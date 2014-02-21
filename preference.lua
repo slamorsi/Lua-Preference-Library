@@ -146,12 +146,12 @@ end
  
  
 function convertTableToString(tab)
-        local finalString = "<t>\n"
+        local finalString = "&lt;t&gt;\n"
         for i,v in pairs(tab) do 
                 local value2 = formatValueForStoring(v,{elementIsInsideATable = true,index = i})
                 finalString = finalString..value2.."\n"
         end
-        finalString = finalString.."<#t>"
+        finalString = finalString.."&lt;#t&gt;"
         return finalString
 end
  
@@ -181,17 +181,17 @@ end
  
  
 local function convertStringToTableElement(str)
-        
+        print("converting: " .. str)
         local index,value
         local separator = elementSeparator
-        if str:find("<t>") then 
+        if str:find("&lt;t&gt;") then 
                 local s,e       =       str:find(separator)
                 index           =       str:sub(1,s-1)
                 value = {}
-        elseif str:find("<#t>") then 
+        elseif str:find("&lt;#t&gt;") then 
                 value = "eot"
 				
-		elseif str:find("<#tn>") then 
+		elseif str:find("&lt;#t&gtn;") then 
                 value = "eot"
         else 
                 local dataType = str:sub(-1,-1)
@@ -221,7 +221,7 @@ end
 local function convertStringToTable(str)
         local finalTable = {}
         
-        local start = 5
+        local start = 11
         local endd = -5
         local tableData = str:sub(start,endd)
         
@@ -247,7 +247,7 @@ local function convertStringToTable(str)
                         if type(value) == "table" then 
                                 tableHierarchy = tableHierarchy + 1
                                 if tableHierarchy == 2 then 
-                                        tableStart = tableData:find("<t>",start)
+                                        tableStart = tableData:find("&lt;t&gt;",start)
                                         tableIndex = index
                                 end
                         end
@@ -259,7 +259,7 @@ local function convertStringToTable(str)
                                         local subTable =  convertStringToTable(subTableString)
 										
 										--index is a number and value is subtable
-										if elementAsString:find("<#tn>") then
+										if elementAsString:find("&lt;#tn&gt;") then
 											finalTable[tableIndex] = nil
 											tableIndex = tonumber(tableIndex)
 										end 
@@ -277,7 +277,9 @@ end
  
 local function parse(fileData)
         local finalString
-        if fileData:sub(1,3)=="<t>" then 
+        print('type string:')
+        print(fileData:sub(1,9))
+        if fileData:sub(1,9)=="&lt;t&gt;" then 
                 finalString = convertStringToTable(fileData)
                 -- dump(finalString)
         else 
