@@ -9,7 +9,7 @@ Web: http:www.timeplusq.com
 --Change Log 
 
 1.1 
-Fixed a minor bug where a subtable with numerical key raises an error.	
+Fixed a minor bug where a subtable with numerical key raises an error.  
 http://developer.coronalabs.com/code/save-data-files-tablesnumbersstringsboolean#comment-120973
  
  
@@ -181,7 +181,6 @@ end
  
  
 local function convertStringToTableElement(str)
-        print("converting: " .. str)
         local index,value
         local separator = elementSeparator
         if str:find("&lt;t&gt;") then 
@@ -190,8 +189,8 @@ local function convertStringToTableElement(str)
                 value = {}
         elseif str:find("&lt;#t&gt;") then 
                 value = "eot"
-				
-		elseif str:find("&lt;#t&gtn;") then 
+        
+    elseif str:find("&lt;#t&gtn;") then 
                 value = "eot"
         else 
                 local dataType = str:sub(-1,-1)
@@ -257,13 +256,13 @@ local function convertStringToTable(str)
                                         tableEnd = pos-1
                                         local subTableString = tableData:sub(tableStart,tableEnd )
                                         local subTable =  convertStringToTable(subTableString)
-										
-										--index is a number and value is subtable
-										if elementAsString:find("&lt;#tn&gt;") then
-											finalTable[tableIndex] = nil
-											tableIndex = tonumber(tableIndex)
-										end 
-										
+                    
+                    --index is a number and value is subtable
+                    if elementAsString:find("&lt;#tn&gt;") then
+                      finalTable[tableIndex] = nil
+                      tableIndex = tonumber(tableIndex)
+                    end 
+                    
                                         finalTable[tableIndex] = subTable
                                 end
                         end
@@ -277,8 +276,6 @@ end
  
 local function parse(fileData)
         local finalString
-        print('type string:')
-        print(fileData:sub(1,9))
         if fileData:sub(1,9)=="&lt;t&gt;" then 
                 finalString = convertStringToTable(fileData)
                 -- dump(finalString)
@@ -307,23 +304,23 @@ end
  
  
 local function initialize()
-        preference.__allFiles = {}
-        local allFiles = preference.__allFiles 
-        local allOptions = loadFile("preference.bin")
-        if not allOptions then 
-                saveFile("preference.bin","")
-                allOptions = ""
-        end
-        
-                local start = 1
-                repeat
-                        local pos = allOptions:find("\n",start);
-                        if pos then
-                                local option = allOptions:sub(start,pos-1)
-                                allFiles[option] = true
-                                start = pos+1
-                        end
-                until(not pos)
+  preference.__allFiles = {}
+  local allFiles = preference.__allFiles 
+  local allOptions = loadFile("preference.bin")
+  if not allOptions then 
+    saveFile("preference.bin","")
+    allOptions = ""
+  end
+  
+  local start = 1
+  repeat
+    local pos = allOptions:find("\n",start);
+    if pos then
+      local option = allOptions:sub(start,pos-1)
+      allFiles[option] = true
+      start = pos+1
+    end
+  until(not pos)
 end
  
  
@@ -382,8 +379,33 @@ function preference.printAll(fileName)
                 print(fileName,value)
         end
 end
- 
- 
+
+function preference.removeAll()
+  for fileName,v in pairs(preference.__allFiles) do 
+    local file = system.pathForFile( fileName, system.DocumentsDirectory )
+    resultOK, errorMsg = os.remove(file)
+
+    if (file) then
+      print(file .. " removed")
+      preference.__allFiles[fileName] = nil
+      removeOption(fileName)
+    else
+      print("Error removing file: " .. file ..":"..errorMsg)
+    end
+  end
+end
+
+function removeOption(option)
+
+  local allOptions = loadFile("preference.bin")
+  if not allOptions then 
+    return
+  end
+  print('removing ' .. option)
+  new = allOptions:gsub("[\n]*"..option.."[\n]*","",1)
+  print('now: ' ..new)
+  saveFile('preference.bin',new)
+end
  
 initialize() 
 return preference
